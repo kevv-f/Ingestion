@@ -1,9 +1,0 @@
-{
-  "name": "com.yourapp.ingestion_host",
-  "description": "Content ingestion native messaging host for Tauri app",
-  "path": "/Users/kelvin/Desktop/Clace AI/Ingestion/native-host/target/release/ingestion-host",
-  "type": "stdio",
-  "allowed_origins": [
-    "chrome-extension://ohimjnpbhdbadinjojadgghoifjejkkm/"
-  ]
-}

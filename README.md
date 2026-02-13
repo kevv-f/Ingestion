@@ -188,24 +188,129 @@ cargo run --release --bin ingestion-server
 
 This starts the Unix socket server at `/tmp/clace-ingestion.sock`.
 
-### 2. Build and Register the Native Host
+### 2. Chrome Extension Installation (Step-by-Step)
+
+The Chrome extension enables content extraction from web pages. Follow these steps carefully:
+
+#### Step 2.1: Build the Native Host Binary
 
 ```bash
 cd native-host
 cargo build --release
+```
 
-# Update the manifest with your extension ID
-# Then copy to Chrome's native messaging directory:
-cp com.yourapp.ingestion_host.json \
+This creates the binary at `native-host/target/release/ingestion-host`.
+
+#### Step 2.2: Load the Chrome Extension
+
+1. Open Chrome and navigate to `chrome://extensions`
+2. Enable **Developer mode** (toggle in the top-right corner)
+3. Click **"Load unpacked"**
+4. Select the `chrome-extension/` directory from this project
+5. The extension will appear in your extensions list
+
+#### Step 2.3: Copy Your Extension ID
+
+After loading the extension:
+1. Look at the extension card in `chrome://extensions`
+2. Find the **ID** field (a 32-character string like `ohimjnpbhdbadinjojadgghoifjejkkm`)
+3. Copy this ID — you'll need it in the next step
+
+#### Step 2.4: Update the Native Host Manifest
+
+Edit `native-host/com.clace.extension.json`:
+
+```json
+{
+  "name": "com.clace.extension",
+  "description": "Clace content ingestion native messaging host",
+  "path": "/ABSOLUTE/PATH/TO/native-host/target/release/ingestion-host",
+  "type": "stdio",
+  "allowed_origins": [
+    "chrome-extension://YOUR_EXTENSION_ID_HERE/"
+  ]
+}
+```
+
+Replace:
+- `/ABSOLUTE/PATH/TO/` with the actual absolute path to your project
+- `YOUR_EXTENSION_ID_HERE` with the extension ID you copied in Step 2.3
+
+**Example (macOS):**
+```json
+{
+  "name": "com.clace.extension",
+  "description": "Clace content ingestion native messaging host",
+  "path": "/Users/yourname/projects/ingestion/native-host/target/release/ingestion-host",
+  "type": "stdio",
+  "allowed_origins": [
+    "chrome-extension://ohimjnpbhdbadinjojadgghoifjejkkm/"
+  ]
+}
+```
+
+#### Step 2.5: Install the Native Host Manifest
+
+**macOS:**
+```bash
+# Create the directory if it doesn't exist
+mkdir -p ~/Library/Application\ Support/Google/Chrome/NativeMessagingHosts/
+
+# Copy the manifest
+cp native-host/com.clace.extension.json \
    ~/Library/Application\ Support/Google/Chrome/NativeMessagingHosts/
 ```
 
-### 3. Load the Chrome Extension
+**Linux:**
+```bash
+# Create the directory if it doesn't exist
+mkdir -p ~/.config/google-chrome/NativeMessagingHosts/
 
-1. Open `chrome://extensions`
-2. Enable Developer mode
-3. Click "Load unpacked" and select `chrome-extension/`
-4. Note the extension ID and update the native host manifest
+# Copy the manifest
+cp native-host/com.clace.extension.json \
+   ~/.config/google-chrome/NativeMessagingHosts/
+```
+
+**Windows:**
+1. Place `com.clace.extension.json` in a permanent location (e.g., `C:\Program Files\Clace\`)
+2. Open Registry Editor (`regedit`)
+3. Navigate to `HKEY_CURRENT_USER\Software\Google\Chrome\NativeMessagingHosts`
+4. Create a new key named `com.clace.extension`
+5. Set the default value to the full path of your JSON file
+
+#### Step 2.6: Restart Chrome
+
+Close and reopen Chrome completely for the native messaging host to be recognized.
+
+#### Step 2.7: Verify the Installation
+
+1. Make sure the ingestion service is running:
+   ```bash
+   ./unified-router/target/release/ingestion
+   ```
+
+2. Open any web page in Chrome
+3. The extension should automatically extract content when you switch tabs
+4. Check the ingestion service logs for incoming content:
+   ```
+   📥 Received content: chrome - Page Title (1234 chars)
+   ✅ Stored: chrome - Page Title
+   ```
+
+#### Troubleshooting
+
+**Extension not connecting to native host:**
+- Verify the `path` in the manifest is an absolute path and the binary exists
+- Verify the `allowed_origins` contains your exact extension ID with trailing slash
+- Check Chrome's native messaging logs: `chrome://extensions` → Extension details → "Inspect views"
+
+**"Native host has exited" error:**
+- Ensure the ingestion service is running (`/tmp/clace-ingestion.sock` must exist)
+- Check that the native host binary has execute permissions: `chmod +x native-host/target/release/ingestion-host`
+
+**Content not being extracted:**
+- Open DevTools (F12) on any page and check the Console for errors
+- Verify the content script is injected: look for `content/index.js` in Sources panel
 
 ## Data Storage
 

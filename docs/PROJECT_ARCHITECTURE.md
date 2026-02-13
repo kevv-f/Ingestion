@@ -364,8 +364,8 @@ Content is considered tabular if:
 **Manifest Configuration:**
 ```json
 {
-  "name": "com.yourapp.ingestion_host",
-  "description": "Content ingestion native messaging host",
+  "name": "com.clace.extension",
+  "description": "Clace content ingestion native messaging host",
   "path": "/path/to/ingestion-host",
   "type": "stdio",
   "allowed_origins": ["chrome-extension://EXTENSION_ID/"]
@@ -469,7 +469,7 @@ sequenceDiagram
 - `/tmp/clace-ingestion.sock`
 
 ### Native Host Manifest
-- `~/Library/Application Support/Google/Chrome/NativeMessagingHosts/com.yourapp.ingestion_host.json`
+- `~/Library/Application Support/Google/Chrome/NativeMessagingHosts/com.clace.extension.json`
 
 ---
 

@@ -24,7 +24,7 @@ echo ""
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
 NATIVE_HOST_DIR="$PROJECT_DIR/native-host"
-MANIFEST_FILE="$NATIVE_HOST_DIR/com.yourapp.ingestion_host.json"
+MANIFEST_FILE="$NATIVE_HOST_DIR/com.clace.extension.json"
 
 # Check if native host is built
 if [ "$PLATFORM" = "windows" ]; then
@@ -64,8 +64,8 @@ fi
 # Create the manifest with correct values
 MANIFEST_CONTENT=$(cat <<EOF
 {
-  "name": "com.yourapp.ingestion_host",
-  "description": "Content ingestion native messaging host for Tauri app",
+  "name": "com.clace.extension",
+  "description": "Clace content ingestion native messaging host",
   "path": "$BINARY_PATH",
   "type": "stdio",
   "allowed_origins": [
@@ -98,7 +98,7 @@ esac
 mkdir -p "$TARGET_DIR"
 
 # Write the manifest
-TARGET_FILE="$TARGET_DIR/com.yourapp.ingestion_host.json"
+TARGET_FILE="$TARGET_DIR/com.clace.extension.json"
 echo "$MANIFEST_CONTENT" > "$TARGET_FILE"
 
 echo "Manifest installed to: $TARGET_FILE"

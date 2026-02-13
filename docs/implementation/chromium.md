@@ -85,12 +85,12 @@ cargo build --release
 
 ### Step 3: Configure the Native Messaging Manifest
 
-Edit `native-host/com.yourapp.ingestion_host.json`:
+Edit `native-host/com.clace.extension.json`:
 
 ```json
 {
-  "name": "com.yourapp.ingestion_host",
-  "description": "Content ingestion native messaging host for Tauri app",
+  "name": "com.clace.extension",
+  "description": "Clace content ingestion native messaging host",
   "path": "/absolute/path/to/native-host/target/release/ingestion-host",
   "type": "stdio",
   "allowed_origins": [
@@ -110,12 +110,12 @@ Edit `native-host/com.yourapp.ingestion_host.json`:
 ```bash
 # For current user only
 mkdir -p ~/Library/Application\ Support/Google/Chrome/NativeMessagingHosts/
-cp native-host/com.yourapp.ingestion_host.json \
+cp native-host/com.clace.extension.json \
    ~/Library/Application\ Support/Google/Chrome/NativeMessagingHosts/
 
 # For all users (requires sudo)
 sudo mkdir -p /Library/Google/Chrome/NativeMessagingHosts/
-sudo cp native-host/com.yourapp.ingestion_host.json \
+sudo cp native-host/com.clace.extension.json \
    /Library/Google/Chrome/NativeMessagingHosts/
 ```
 
@@ -124,12 +124,12 @@ sudo cp native-host/com.yourapp.ingestion_host.json \
 ```bash
 # For current user only
 mkdir -p ~/.config/google-chrome/NativeMessagingHosts/
-cp native-host/com.yourapp.ingestion_host.json \
+cp native-host/com.clace.extension.json \
    ~/.config/google-chrome/NativeMessagingHosts/
 
 # For all users (requires sudo)
 sudo mkdir -p /etc/opt/chrome/native-messaging-hosts/
-sudo cp native-host/com.yourapp.ingestion_host.json \
+sudo cp native-host/com.clace.extension.json \
    /etc/opt/chrome/native-messaging-hosts/
 ```
 
@@ -138,7 +138,7 @@ sudo cp native-host/com.yourapp.ingestion_host.json \
 1. Place the manifest JSON file in a permanent location (e.g., `C:\Program Files\YourApp\`)
 2. Add a registry key:
    ```
-   HKEY_CURRENT_USER\Software\Google\Chrome\NativeMessagingHosts\com.yourapp.ingestion_host
+   HKEY_CURRENT_USER\Software\Google\Chrome\NativeMessagingHosts\com.clace.extension
    ```
 3. Set the default value to the full path of the JSON file
 
@@ -440,8 +440,8 @@ The manifest tells Chrome how to launch the native host:
 
 ```json
 {
-  "name": "com.yourapp.ingestion_host",
-  "description": "Content ingestion native messaging host",
+  "name": "com.clace.extension",
+  "description": "Clace content ingestion native messaging host",
   "path": "/absolute/path/to/ingestion-host",
   "type": "stdio",
   "allowed_origins": [

@@ -389,7 +389,7 @@ flowchart TD
             H7 --> I
 
             I --> J{Native port open?}
-            J -->|No| K[chrome.runtime.connectNative\ncom.yourapp.ingestion_host]
+            J -->|No| K[chrome.runtime.connectNative\ncom.clace.extension]
             J -->|Yes| L[port.postMessage\n≤ 64 MiB payload]
             K --> L
         end
@@ -509,10 +509,10 @@ Does the offscreen document already exist?
 If this is the first tab event since Chrome launched (or since the offscreen document was garbage collected), it creates the document. The offscreen document, on creation, immediately opens the native messaging port:
 
 ```
-chrome.runtime.connectNative('com.yourapp.ingestion_host')
+chrome.runtime.connectNative('com.clace.extension')
 ```
 
-This tells Chrome: "Start the native host binary registered under that name." Chrome looks up the native messaging manifest file at `~/Library/Application Support/Google/Chrome/NativeMessagingHosts/com.yourapp.ingestion_host.json`, reads the `path` field, and spawns that binary (your Tauri app's ingestion host). A stdin/stdout pipe is now open between the offscreen document and the Tauri process.
+This tells Chrome: "Start the native host binary registered under that name." Chrome looks up the native messaging manifest file at `~/Library/Application Support/Google/Chrome/NativeMessagingHosts/com.clace.extension.json`, reads the `path` field, and spawns that binary (your Tauri app's ingestion host). A stdin/stdout pipe is now open between the offscreen document and the Tauri process.
 
 If the offscreen document already existed, the native port is already open and connected. No work needed.
 

@@ -12,7 +12,7 @@
  * 4. Page load complete (initial page load)
  */
 
-const NATIVE_HOST_NAME = 'com.yourapp.ingestion_host';
+const NATIVE_HOST_NAME = 'com.clace.extension';
 
 // Track the last processed tab+url to avoid duplicate extractions
 let lastProcessedTabId = null;

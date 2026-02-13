@@ -11,11 +11,11 @@ Copy the manifest to Chrome's native messaging hosts directory:
 ```bash
 # For current user only
 mkdir -p ~/Library/Application\ Support/Google/Chrome/NativeMessagingHosts/
-cp com.yourapp.ingestion_host.json ~/Library/Application\ Support/Google/Chrome/NativeMessagingHosts/
+cp com.clace.extension.json ~/Library/Application\ Support/Google/Chrome/NativeMessagingHosts/
 
 # For all users (requires sudo)
 sudo mkdir -p /Library/Google/Chrome/NativeMessagingHosts/
-sudo cp com.yourapp.ingestion_host.json /Library/Google/Chrome/NativeMessagingHosts/
+sudo cp com.clace.extension.json /Library/Google/Chrome/NativeMessagingHosts/
 ```
 
 ### Linux
@@ -23,11 +23,11 @@ sudo cp com.yourapp.ingestion_host.json /Library/Google/Chrome/NativeMessagingHo
 ```bash
 # For current user only
 mkdir -p ~/.config/google-chrome/NativeMessagingHosts/
-cp com.yourapp.ingestion_host.json ~/.config/google-chrome/NativeMessagingHosts/
+cp com.clace.extension.json ~/.config/google-chrome/NativeMessagingHosts/
 
 # For all users (requires sudo)
 sudo mkdir -p /etc/opt/chrome/native-messaging-hosts/
-sudo cp com.yourapp.ingestion_host.json /etc/opt/chrome/native-messaging-hosts/
+sudo cp com.clace.extension.json /etc/opt/chrome/native-messaging-hosts/
 ```
 
 ### Windows
@@ -36,7 +36,7 @@ sudo cp com.yourapp.ingestion_host.json /etc/opt/chrome/native-messaging-hosts/
 2. Add a registry key pointing to it:
 
 ```
-HKEY_CURRENT_USER\Software\Google\Chrome\NativeMessagingHosts\com.yourapp.ingestion_host
+HKEY_CURRENT_USER\Software\Google\Chrome\NativeMessagingHosts\com.clace.extension
 ```
 
 Set the default value to the full path of the JSON file.
