@@ -1,0 +1,52 @@
+# Build artifacts
+target/
+.build/
+dist/
+
+# Dependencies
+node_modules/
+
+# IDE and editor files
+.idea/
+.vscode/
+.kiro/
+*.swp
+*.swo
+*~
+.kiro
+.vscode
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Rust
+Cargo.lock
+*.rlib
+*.rmeta
+
+# Swift
+*.xcodeproj
+*.xcworkspace
+DerivedData/
+.swiftpm/
+
+# Test artifacts
+proptest-regressions/
+
+# Database files (local development)
+*.db
+*.db-journal
+*.db-shm
+*.db-wal
+
+# Socket files
+*.sock

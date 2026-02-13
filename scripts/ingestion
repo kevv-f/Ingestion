@@ -1,0 +1,232 @@
+#!/bin/bash
+# Unified Ingestion Service Launcher
+# Usage: ingestion [start|stop|status|install|uninstall]
+
+set -e
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
+
+# Binary paths
+INGESTION_BIN="$PROJECT_ROOT/unified-router/target/release/ingestion"
+INGESTION_SERVER_BIN="$PROJECT_ROOT/ingestion-service/target/release/ingestion-server"
+
+# LaunchAgent paths
+LAUNCH_AGENT_DIR="$HOME/Library/LaunchAgents"
+LAUNCH_AGENT_PLIST="$LAUNCH_AGENT_DIR/com.clace.ingestion.plist"
+
+# Socket and data paths
+SOCKET_PATH="/tmp/clace-ingestion.sock"
+DATA_DIR="$HOME/Library/Application Support/clace-ingestion"
+LOG_FILE="$DATA_DIR/ingestion.log"
+
+print_usage() {
+    echo "Unified Ingestion Service"
+    echo ""
+    echo "Usage: ingestion <command> [options]"
+    echo ""
+    echo "Commands:"
+    echo "  start       Start the ingestion service"
+    echo "  stop        Stop the ingestion service"
+    echo "  status      Check service status"
+    echo "  install     Install as LaunchAgent (auto-start on login)"
+    echo "  uninstall   Remove LaunchAgent"
+    echo "  logs        Show service logs"
+    echo "  build       Build all components"
+    echo ""
+    echo "Options:"
+    echo "  --ocr               Enable OCR extraction (runs as background service)"
+    echo "  --no-accessibility  Disable accessibility extraction"
+    echo "  --interval <secs>   Capture interval (default: 5)"
+    echo ""
+    echo "Examples:"
+    echo "  ingestion start                    # Start with accessibility + Chrome"
+    echo "  ingestion start --ocr              # Also enable OCR extraction"
+    echo "  ingestion start --interval 10      # 10 second interval"
+    echo "  ingestion install                  # Install as LaunchAgent"
+}
+
+check_binary() {
+    if [[ ! -f "$INGESTION_BIN" ]]; then
+        echo "❌ Ingestion binary not found at: $INGESTION_BIN"
+        echo "   Run: ./scripts/build-all.sh --release"
+        exit 1
+    fi
+}
+
+start_service() {
+    check_binary
+    
+    # Create data directory
+    mkdir -p "$DATA_DIR"
+    
+    echo "🚀 Starting Unified Ingestion Service..."
+    
+    # Pass through any additional arguments
+    shift || true
+    exec "$INGESTION_BIN" "$@"
+}
+
+stop_service() {
+    echo "🛑 Stopping Ingestion Service..."
+    
+    # Find and kill the process
+    pkill -f "ingestion" 2>/dev/null || true
+    pkill -f "ingestion-server" 2>/dev/null || true
+    
+    # Remove socket
+    rm -f "$SOCKET_PATH"
+    
+    echo "   ✅ Service stopped"
+}
+
+check_status() {
+    echo "📊 Ingestion Service Status"
+    echo ""
+    
+    # Check if process is running
+    if pgrep -f "ingestion" > /dev/null 2>&1; then
+        echo "   Process: ✅ Running"
+        pgrep -fl "ingestion" | head -3
+    else
+        echo "   Process: ❌ Not running"
+    fi
+    
+    echo ""
+    
+    # Check socket
+    if [[ -S "$SOCKET_PATH" ]]; then
+        echo "   Socket: ✅ $SOCKET_PATH"
+    else
+        echo "   Socket: ❌ Not found"
+    fi
+    
+    echo ""
+    
+    # Check database
+    if [[ -f "$DATA_DIR/content.db" ]]; then
+        DB_SIZE=$(du -h "$DATA_DIR/content.db" | cut -f1)
+        echo "   Database: ✅ $DATA_DIR/content.db ($DB_SIZE)"
+    else
+        echo "   Database: ❌ Not found"
+    fi
+    
+    echo ""
+    
+    # Check LaunchAgent
+    if [[ -f "$LAUNCH_AGENT_PLIST" ]]; then
+        if launchctl list | grep -q "com.clace.ingestion"; then
+            echo "   LaunchAgent: ✅ Installed and loaded"
+        else
+            echo "   LaunchAgent: ⚠️  Installed but not loaded"
+        fi
+    else
+        echo "   LaunchAgent: ❌ Not installed"
+    fi
+}
+
+install_launch_agent() {
+    check_binary
+    
+    echo "📦 Installing LaunchAgent..."
+    
+    mkdir -p "$LAUNCH_AGENT_DIR"
+    mkdir -p "$DATA_DIR"
+    
+    cat > "$LAUNCH_AGENT_PLIST" << EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.clace.ingestion</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>$INGESTION_BIN</string>
+    </array>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <true/>
+    <key>StandardOutPath</key>
+    <string>$LOG_FILE</string>
+    <key>StandardErrorPath</key>
+    <string>$LOG_FILE</string>
+    <key>WorkingDirectory</key>
+    <string>$PROJECT_ROOT</string>
+</dict>
+</plist>
+EOF
+
+    echo "   ✅ Created $LAUNCH_AGENT_PLIST"
+    
+    # Load the agent
+    launchctl load "$LAUNCH_AGENT_PLIST" 2>/dev/null || true
+    
+    echo "   ✅ LaunchAgent loaded"
+    echo ""
+    echo "The service will now start automatically on login."
+    echo "To start now: launchctl start com.clace.ingestion"
+}
+
+uninstall_launch_agent() {
+    echo "🗑️  Uninstalling LaunchAgent..."
+    
+    if [[ -f "$LAUNCH_AGENT_PLIST" ]]; then
+        launchctl unload "$LAUNCH_AGENT_PLIST" 2>/dev/null || true
+        rm -f "$LAUNCH_AGENT_PLIST"
+        echo "   ✅ LaunchAgent removed"
+    else
+        echo "   ⚠️  LaunchAgent not installed"
+    fi
+}
+
+show_logs() {
+    if [[ -f "$LOG_FILE" ]]; then
+        echo "📜 Showing logs from $LOG_FILE"
+        echo ""
+        tail -f "$LOG_FILE"
+    else
+        echo "❌ Log file not found: $LOG_FILE"
+        echo "   Service may not have been started yet."
+    fi
+}
+
+build_all() {
+    echo "🔨 Building all components..."
+    "$SCRIPT_DIR/build-all.sh" --release
+}
+
+# Main command dispatch
+case "${1:-}" in
+    start)
+        start_service "$@"
+        ;;
+    stop)
+        stop_service
+        ;;
+    status)
+        check_status
+        ;;
+    install)
+        install_launch_agent
+        ;;
+    uninstall)
+        uninstall_launch_agent
+        ;;
+    logs)
+        show_logs
+        ;;
+    build)
+        build_all
+        ;;
+    --help|-h|"")
+        print_usage
+        ;;
+    *)
+        echo "Unknown command: $1"
+        echo ""
+        print_usage
+        exit 1
+        ;;
+esac

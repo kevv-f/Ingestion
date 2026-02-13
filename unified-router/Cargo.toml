@@ -1,0 +1,51 @@
+[package]
+name = "unified-router"
+version = "0.1.0"
+edition = "2021"
+description = "Unified content extraction router for desktop applications"
+
+[[bin]]
+name = "unified-router"
+path = "src/main.rs"
+
+[[bin]]
+name = "ingestion"
+path = "src/bin/ingestion.rs"
+
+[dependencies]
+# Async runtime
+tokio = { version = "1", features = ["full", "net", "sync", "time", "fs", "process"] }
+
+# Serialization
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+toml = "0.8"
+
+# Logging
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+
+# Image processing
+image = "0.25"
+
+# Utilities
+lazy_static = "1.4"
+regex = "1"
+sha2 = "0.10"
+dirs = "5"
+chrono = "0.4"
+thiserror = "1"
+glob = "0.3"
+async-trait = "0.1"
+ctrlc = "3.4"
+
+[target.'cfg(target_os = "macos")'.dependencies]
+# macOS-specific
+core-foundation = "0.9"
+core-graphics = "0.23"
+cocoa = "0.25"
+objc = "0.2"
+foreign-types-shared = "0.3"
+
+[dev-dependencies]
+tempfile = "3"
